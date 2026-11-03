@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Sổ chuyến xe, thu chi, công nợ và lãi lỗ cho Vận tải Sự Nghiệp">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F59E0B'/%3E%3Ctext x='16' y='23' font-size='19' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%230B2440'%3E%E2%82%AB%3C/text%3E%3C/svg%3E">
+<style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head><body>
+<title>Sổ Chuyến Sự Nghiệp</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: sổ kế toán số — điều hướng trái (desktop)/thanh dưới (điện thoại), bảng số căn phải tabular, màu xanh navy + cam vận tải; số tiền dương xanh lá, âm/nợ đỏ. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --surface-2:#ECEFF4; --line:#D9DFE8;
+  --ink:#0E1B2B; --muted:#5A6777; --navy:#0B2440; --navy-ink:#FFFFFF;
+  --accent:#F59E0B; --accent-ink:#2A1A00; --accent-soft:#FEF3DC;
+  --ok:#15803D; --ok-soft:#E3F4E8; --warn:#B45309; --warn-soft:#FDF0DC; --bad:#B91C1C; --bad-soft:#FBE4E4; --info:#1D5FAF; --info-soft:#E2ECF8;
+  --shadow:0 1px 2px rgba(11,36,64,.06),0 6px 20px rgba(11,36,64,.06);
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1420; --surface:#122033; --surface-2:#18293F; --line:#24384F; --ink:#E6EDF5; --muted:#93A3B6; --navy:#07111D; --navy-ink:#E6EDF5;
+  --accent:#F7AE33; --accent-ink:#241500; --accent-soft:#3A2A0C; --ok:#4ADE80; --ok-soft:#12321F; --warn:#FBBF5C; --warn-soft:#3A2A10; --bad:#F87171; --bad-soft:#3A1717; --info:#7FB2F0; --info-soft:#15304F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1420; --surface:#122033; --surface-2:#18293F; --line:#24384F; --ink:#E6EDF5; --muted:#93A3B6; --navy:#07111D; --navy-ink:#E6EDF5;
+  --accent:#F7AE33; --accent-ink:#241500; --accent-soft:#3A2A0C; --ok:#4ADE80; --ok-soft:#12321F; --warn:#FBBF5C; --warn-soft:#3A2A10; --bad:#F87171; --bad-soft:#3A1717; --info:#7FB2F0; --info-soft:#15304F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25); color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100%}
+.side{background:var(--navy);color:var(--navy-ink);padding:20px 14px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px}
+.brand-mark{width:34px;height:34px;border-radius:8px;background:var(--accent);display:grid;place-items:center;flex:none;font-weight:800;color:#0B2440}
+.brand-name{font-weight:800;letter-spacing:.02em;line-height:1.15}
+.brand-name small{display:block;font-weight:500;opacity:.65;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.nav{display:flex;flex-direction:column;gap:4px}
+.nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:inherit;text-decoration:none;font-weight:500;opacity:.78;position:relative}
+.nav a:hover{opacity:1;background:rgba(255,255,255,.06)}
+.nav a[aria-current="page"]{opacity:1;background:rgba(245,158,11,.16);color:#FFD27A}
+.nav a[aria-current="page"]::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--accent)}
+.nav svg{width:20px;height:20px;flex:none}
+.side-foot{margin-top:auto;font-size:12px;opacity:.7;padding:0 6px;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok)} .dot.off{background:var(--accent)}
+.main{min-width:0;padding-block:22px 90px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.01em}
+.head p{margin:2px 0 0;color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;min-height:40px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad);border-color:var(--bad)} .btn.danger.solid{background:var(--bad);color:#fff}
+.btn.sm{min-height:32px;padding:5px 10px;font-size:13px}
+.btn.ghost{background:transparent;border-color:transparent}
+.btn svg{width:18px;height:18px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel-h h2{margin:0;font-size:16px;font-weight:700}
+.panel-b{padding:14px 16px}
+.muted{color:var(--muted)}
+.note{padding:10px 14px;border-radius:8px;background:var(--warn-soft);color:var(--warn);font-size:14px}
+.note.info{background:var(--info-soft);color:var(--info)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi .lbl{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.kpi .val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25;word-break:break-word}
+.kpi .sub{font-size:13px;color:var(--muted)}
+.kpi.hl{background:var(--navy);color:var(--navy-ink);border-color:var(--navy)}
+.kpi.hl .lbl,.kpi.hl .sub{color:inherit;opacity:.75}
+.pos{color:var(--ok)} .neg{color:var(--bad)} .kpi.hl .pos{color:#7BE3A0} .kpi.hl .neg{color:#FF9B9B}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr.click{cursor:pointer} tbody tr.click:hover td{background:var(--surface-2)}
+tfoot td{font-weight:800;border-top:2px solid var(--ink);border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub2{font-size:12.5px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)} .p-warn{background:var(--warn-soft);color:var(--warn)} .p-bad{background:var(--bad-soft);color:var(--bad)} .p-info{background:var(--info-soft);color:var(--info)} .p-mute{background:var(--surface-2);color:var(--muted)}
+.tag-sample{font-size:10.5px;font-weight:700;letter-spacing:.06em;background:var(--accent-soft);color:var(--warn);padding:1px 6px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.empty{padding:28px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty b{color:var(--ink);font-size:16px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f label{font-size:13px;font-weight:600}
+.f label .req{color:var(--bad)}
+.f input,.f select,.f textarea{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 11px;min-height:40px;width:100%;min-width:0}
+.f textarea{min-height:64px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.f .hint{font-size:12px;color:var(--muted)}
+.f input.money{text-align:right;font-variant-numeric:tabular-nums}
+.filters .f{width:170px} .filters .f.wide{flex:1 1 220px;width:auto}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;padding:0 8px}
+.tab{all:unset;cursor:pointer;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.tab:focus-visible{outline:3px solid var(--accent)}
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(7,17,29,.45);z-index:40;display:flex;justify-content:center;align-items:center;padding:16px}
+.modal{background:var(--surface);width:min(680px,100%);max-height:100%;overflow-y:auto;border-radius:14px;box-shadow:var(--shadow)}
+.modal-h{display:flex;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-h h2{margin:0;font-size:18px;font-weight:800}
+.x{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:8px;margin-left:auto}
+.x:hover{background:var(--surface-2)} .x svg{width:22px;height:22px}
+.modal-b{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.modal-f{display:flex;gap:10px;justify-content:flex-end;align-items:center;padding:14px 18px;border-top:1px solid var(--line);flex-wrap:wrap;position:sticky;bottom:0;background:var(--surface)}
+.modal-f .left{margin-right:auto}
+.fg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+.fg .s2{grid-column:span 2} .fg .full{grid-column:1/-1}
+.sec-t{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:4px 0 -4px;grid-column:1/-1}
+.calc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;background:var(--surface-2);border-radius:8px;padding:12px}
+.calc div{display:flex;flex-direction:column} .calc span{font-size:12px;color:var(--muted);font-weight:600} .calc b{font-variant-numeric:tabular-nums;font-size:16px}
+.err{color:var(--bad);font-size:13px;font-weight:600}
+.confirm{background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:var(--navy-ink);padding:10px 18px;border-radius:99px;font-weight:600;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.hbar{display:grid;grid-template-columns:150px 1fr 110px;gap:10px;align-items:center;font-size:14px}
+.hbar .track{height:14px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:4px}
+.hbar .n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.guide div{background:var(--surface-2);border-radius:8px;padding:12px} .guide b{display:block;margin-bottom:2px}
+.cards{display:none}
+.card-row{display:flex;gap:10px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);cursor:pointer}
+.card-row:first-child{border-top:0}
+.card-row .grow{flex:1;min-width:0}
+.card-row .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-row .m{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:980px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;inset:auto 0 0 0;height:auto;top:auto;z-index:30;padding:6px max(6px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-left,0px));flex-direction:row;gap:0}
+  .brand,.side-foot{display:none}
+  .nav{flex-direction:row;flex:1;justify-content:space-around;gap:0}
+  .nav a{flex-direction:column;gap:2px;font-size:10.5px;padding:6px 2px;flex:1;text-align:center}
+  .nav a[aria-current="page"]::before{left:25%;right:25%;top:-6px;bottom:auto;width:auto;height:3px;border-radius:0 0 3px 3px}
+  .fg,.guide{grid-template-columns:1fr} .fg .s2{grid-column:auto}
+  .calc{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .head h1{font-size:22px} .kpi .val{font-size:21px}
+  .filters .f{width:calc(50% - 5px)} .filters .f.wide{width:100%}
+  .hide-m{display:none}
+  .hbar{grid-template-columns:96px 1fr 84px}
+  .tbl-wrap.swap{display:none} .cards{display:block}
+}
+</style>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="brand-mark" aria-hidden="true">₫</div><div class="brand-name">SỰ NGHIỆP<small>Sổ chuyến &amp; công nợ</small></div></div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot" id="sideFoot"></div>
+  </aside>
+  <main class="main"><div class="wrap" id="view"></div></main>
+</div>
+<div id="layer"></div><div id="toastBox"></div>
+
+<script>
+/* ---------- cấu hình ---------- */
+const COST_FIELDS=[['fuel','Dầu'],['toll','Cầu đường / BOT'],['loading','Bốc xếp / cẩu'],['driverPay','Lương, phụ cấp tài xế'],['otherCost','Chi khác']];
+const EXP_CATS=['Sửa chữa, bảo dưỡng xe','Lốp, phụ tùng','Đăng kiểm, phí đường bộ','Bảo hiểm xe','Lương văn phòng','Thuê bãi, văn phòng','Điện thoại, internet','Trả góp, lãi vay xe','Chi khác'];
+const METHODS=['Chuyển khoản','Tiền mặt'];
+const VATS=[{v:0,t:'Không xuất hóa đơn'},{v:8,t:'VAT 8%'},{v:10,t:'VAT 10%'}];
+const IC={
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+  truck:'<path d="M2 16V6h12v10"/><path d="M14 9h4.5L22 12.5V16h-8"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/>',
+  cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
+  debt:'<path d="M7 3h10v18l-2.5-1.6L12 21l-2.5-1.6L7 21z"/><path d="M10 8h4M10 12h4"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'};
+const svg=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ---------- tiện ích ---------- */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const dstr=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>dstr(new Date());
+const fmtD=s=>{if(!s)return '';const [y,m,d]=s.slice(0,10).split('-');return `${d}/${m}/${y}`};
+const daysBetween=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+const NF=new Intl.NumberFormat('vi-VN');
+const vnd=v=>NF.format(Math.round(+v||0));
+const vndS=v=>{v=Math.round(+v||0);const a=Math.abs(v),s=v<0?'−':'';if(a>=1e9)return s+(a/1e9).toLocaleString('vi-VN',{maximumFractionDigits:2})+' tỷ';if(a>=1e6)return s+(a/1e6).toLocaleString('vi-VN',{maximumFractionDigits:1})+' tr';return s+NF.format(a)+' đ'};
+const parseMoney=s=>+String(s||'').replace(/\D/g,'')||0;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').trim();
+const sgn=v=>v>0?'pos':v<0?'neg':'';
+
+/* ---------- tính toán ---------- */
+const tripCost=t=>COST_FIELDS.reduce((s,[k])=>s+(+t[k]||0),0);
+const tripVat=t=>Math.round((+t.freight||0)*(+t.vat||0)/100);
+const tripTotal=t=>(+t.freight||0)+tripVat(t);
+const tripProfit=t=>(+t.freight||0)-tripCost(t);
+/* công nợ: phân bổ tiền thu cho chuyến cũ nhất trước (FIFO) theo từng khách */
+function ledger(){
+  const by={};
+  const key=n=>norm(n);
+  for(const t of S.trips){const k=key(t.customer);(by[k]??={name:t.customer,trips:[],receipts:[]}).trips.push(t)}
+  for(const r of S.receipts){const k=key(r.customer);(by[k]??={name:r.customer,trips:[],receipts:[]}).receipts.push(r)}
+  const tripPaid={};const t0=today();
+  const rows=Object.values(by).map(c=>{
+    c.trips.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    const billed=c.trips.reduce((s,t)=>s+tripTotal(t),0);
+    const paid=c.receipts.reduce((s,r)=>s+(+r.amount||0),0);
+    let pool=paid;const age={a:0,b:0,c:0};let oldest=null;
+    for(const t of c.trips){const tot=tripTotal(t);const use=Math.min(pool,tot);pool-=use;tripPaid[t.id]=use;const left=tot-use;
+      if(left>0){const d=daysBetween(t.date,t0);if(d<=30)age.a+=left;else if(d<=60)age.b+=left;else age.c+=left;if(!oldest)oldest=t.date}}
+    return{name:c.name,billed,paid,debt:billed-paid,age,oldest,trips:c.trips.length,lastTrip:c.trips.at(-1)?.date||''};
+  }).sort((a,b)=>b.debt-a.debt);
+  return{rows,tripPaid};
+}
+function tripStatus(t,paidMap){const tot=tripTotal(t),p=paidMap[t.id]||0;if(p>=tot&&tot>0)return['Đã thu đủ','p-ok'];if(p>0)return['Thu một phần','p-warn'];return['Chưa thu','p-bad']}
+
+/* ---------- dữ liệu ---------- */
+const COLS=['trips','receipts','expenses'];
+const S={trips:[],receipts:[],expenses:[],loaded:{trips:false,receipts:false,expenses:false},mode:'loading'};
+let db=null,dl=null;
+function toast(m){const b=document.getElementById('toastBox');b.innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>b.innerHTML='',2600)}
+function werr(e){const c=e&&e.code;toast(c==='invalid_argument'?'Bạn chỉ có quyền xem, không sửa được.':c==='quota_exceeded'?'Kho dữ liệu đã đầy.':'Chưa lưu được, thử lại sau ít giây.')}
+const LS='sochuyen_su_nghiep_v1';
+function persist(){try{localStorage.setItem(LS,JSON.stringify({trips:S.trips,receipts:S.receipts,expenses:S.expenses,savedAt:new Date().toISOString()}))}catch(e){toast('Trình duyệt không cho lưu dữ liệu. Hãy sao lưu file thường xuyên.')}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d)COLS.forEach(c=>S[c]=Array.isArray(d[c])?d[c]:[])}catch(_){}}
+async function save(col,id,data){if(db){try{await db.collection(col).doc(id).set(data)}catch(e){werr(e);throw e}}else{const a=S[col];const i=a.findIndex(x=>x.id===id);const r={id,...data};i>=0?a[i]=r:a.push(r);persist();render()}}
+async function remove(col,id){if(db){try{await db.collection(col).doc(id).delete()}catch(e){werr(e);throw e}}else{S[col]=S[col].filter(x=>x.id!==id);persist();render()}}
+async function boot(){
+  render();
+  const cl=window.claude&&window.claude.use?window.claude:null;
+  if(cl){cl.use('downloads').then(d=>{dl=d;render()}).catch(()=>{})}
+  db=cl?await cl.use('db').catch(()=>null):null;
+  window.addEventListener('storage',e=>{if(e.key===LS&&!db){loadLocal();render()}});
+  if(!db){S.mode='local';loadLocal();COLS.forEach(c=>S.loaded[c]=true);render();return}
+  S.mode='live';
+  const timer=setTimeout(()=>{if(!COLS.every(c=>S.loaded[c])){S.mode='slow';render()}},10000);
+  COLS.forEach(c=>db.collection(c).onSnapshot(snap=>{S[c]=snap.docs.map(d=>({id:d.id,...d.data()}));if(!snap.metadata.fromCache)S.loaded[c]=true;if(COLS.every(x=>S.loaded[x])){clearTimeout(timer);if(S.mode==='slow')S.mode='live'}render()},()=>{S.loaded[c]=true;S.mode='error';clearTimeout(timer);render()}));
+}
+const loading=()=>!COLS.every(c=>S.loaded[c]);
+const customers=()=>[...new Set([...S.trips,...S.receipts].map(x=>x.customer).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'vi'));
+const plates=()=>[...new Set([...S.trips,...S.expenses].map(x=>x.plate).filter(Boolean))].sort();
+const drivers=()=>[...new Set(S.trips.map(x=>x.driver).filter(Boolean))].sort();
+
+/* ---------- điều hướng ---------- */
+const ROUTES=[{k:'tong-quan',t:'Tổng quan',i:'home'},{k:'chuyen-xe',t:'Chuyến xe',i:'truck'},{k:'thu-chi',t:'Thu chi',i:'cash'},{k:'cong-no',t:'Công nợ',i:'debt'},{k:'bao-cao',t:'Báo cáo',i:'chart'}];
+let route='tong-quan';
+const UI={month:today().slice(0,7),q:'',pay:'all',tc:'thu'};
+function readHash(){const h=location.hash.slice(1);route=ROUTES.some(r=>r.k===h)?h:'tong-quan'}
+window.addEventListener('hashchange',()=>{readHash();render();scrollTo(0,0)});
+function renderNav(){
+  document.getElementById('nav').innerHTML=ROUTES.map(r=>`<a href="#${r.k}" ${r.k===route?'aria-current="page"':''}>${svg(r.i)}<span>${r.t}</span></a>`).join('');
+  const m={loading:['off','Đang tải dữ liệu…'],live:['','Đã lưu trực tuyến'],slow:['off','Mạng chậm'],error:['off','Mất kết nối dữ liệu'],local:['','Đã lưu trên máy này']}[S.mode];
+  document.getElementById('sideFoot').innerHTML=`<span class="dot ${m[0]}"></span>${m[1]}`;
+}
+function render(){
+  const ae=document.activeElement;const keep=ae&&ae.id&&document.getElementById('view').contains(ae)?{id:ae.id,s:ae.selectionStart,e:ae.selectionEnd}:null;
+  renderNav();
+  document.getElementById('view').innerHTML=({'tong-quan':vDash,'chuyen-xe':vTrips,'thu-chi':vCash,'cong-no':vDebt,'bao-cao':vReport})[route]();
+  if(keep){const el=document.getElementById(keep.id);if(el){el.focus();try{el.setSelectionRange(keep.s,keep.e)}catch(_){}}}
+}
+const head=(t,s,a='')=>`<div class="head"><div><h1>${t}</h1>${s?`<p>${s}</p>`:''}</div><div class="toolbar">${a}</div></div>`;
+function modeNote(){
+  if(S.mode==='local')return `<div class="note info" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1 1 280px">Dữ liệu được lưu trên trình duyệt của máy này. Hãy bấm <b>Sao lưu</b> mỗi cuối ngày để giữ một bản file, và dùng <b>Khôi phục</b> khi đổi máy.</span><button class="btn sm" data-act="backup">Sao lưu</button><label class="btn sm" for="restoreFile">Khôi phục</label><input type="file" id="restoreFile" accept=".json,application/json" hidden></div>`;
+  if(S.mode==='error')return `<div class="note">Không kết nối được kho dữ liệu. Tải lại trang sau ít phút.</div>`;
+  if(S.mode==='slow')return `<div class="note">Mạng chậm, số liệu có thể chưa mới nhất.</div>`;return ''}
+const monthPicker=()=>`<div class="f" style="flex-direction:row;align-items:center;gap:8px"><label for="month" style="white-space:nowrap">Tháng</label><input id="month" type="month" value="${UI.month}"></div>`;
+const mLabel=m=>`tháng ${+m.slice(5)}/${m.slice(0,4)}`;
+const inMonth=(d,m)=>(d||'').slice(0,7)===m;
+
+/* ----- Tổng quan ----- */
+function vDash(){
+  const m=UI.month;
+  if(loading()&&!S.trips.length)return head('Tổng quan','')+`<div class="panel"><div class="empty">Đang tải dữ liệu…</div></div>`;
+  const tr=S.trips.filter(t=>inMonth(t.date,m));
+  const rev=tr.reduce((s,t)=>s+(+t.freight||0),0);
+  const tcost=tr.reduce((s,t)=>s+tripCost(t),0);
+  const exp=S.expenses.filter(e=>inMonth(e.date,m)).reduce((s,e)=>s+(+e.amount||0),0);
+  const profit=rev-tcost-exp;
+  const L=ledger();const debt=L.rows.reduce((s,r)=>s+Math.max(0,r.debt),0);const over60=L.rows.reduce((s,r)=>s+r.age.c,0);
+  const rcv=S.receipts.filter(r=>inMonth(r.date,m)).reduce((s,r)=>s+(+r.amount||0),0);
+  const top=L.rows.filter(r=>r.debt>0).slice(0,6);
+  const recent=[...S.trips].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,6);
+  return `${head('Tổng quan',mLabel(m),`${monthPicker()}<button class="btn primary" data-act="newTrip">${svg('plus')}Nhập chuyến</button>`)}
+  ${modeNote()}
+  ${S.trips.length||S.expenses.length||S.receipts.length?'':guide()}
+  <div class="kpis">
+    <div class="panel kpi"><span class="lbl">Doanh thu cước</span><span class="val">${vndS(rev)}</span><span class="sub">${tr.length} chuyến · chưa gồm VAT</span></div>
+    <div class="panel kpi"><span class="lbl">Tổng chi phí</span><span class="val">${vndS(tcost+exp)}</span><span class="sub">chuyến ${vndS(tcost)} · chung ${vndS(exp)}</span></div>
+    <div class="panel kpi hl"><span class="lbl">Lãi tạm tính</span><span class="val ${sgn(profit)}">${vndS(profit)}</span><span class="sub">biên lãi ${rev?Math.round(profit*100/rev)+'%':'—'}</span></div>
+    <div class="panel kpi"><span class="lbl">Khách còn nợ</span><span class="val ${debt?'neg':''}">${vndS(debt)}</span><span class="sub">quá 60 ngày ${vndS(over60)} · thu tháng này ${vndS(rcv)}</span></div>
+  </div>
+  <div class="grid2">
+    <section class="panel"><div class="panel-h"><h2>Khách nợ nhiều nhất</h2><a class="btn sm" href="#cong-no">Xem công nợ</a></div>
+      ${top.length?`<div class="tbl-wrap"><table><thead><tr><th>Khách</th><th class="num">Còn nợ</th><th class="num hide-m">Nợ cũ nhất</th></tr></thead><tbody>${top.map(r=>`<tr><td>${esc(r.name)}</td><td class="num neg">${vnd(r.debt)}</td><td class="num hide-m">${r.oldest?daysBetween(r.oldest,today())+' ngày':'—'}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Không có khách nào còn nợ.</div>`}</section>
+    <section class="panel"><div class="panel-h"><h2>Chuyến mới nhập</h2><a class="btn sm" href="#chuyen-xe">Tất cả chuyến</a></div>
+      ${recent.length?`<div class="tbl-wrap"><table><thead><tr><th>Ngày</th><th>Khách · Tuyến</th><th class="num">Lãi chuyến</th></tr></thead><tbody>${recent.map(t=>`<tr class="click" data-act="editTrip" data-id="${t.id}"><td style="white-space:nowrap">${fmtD(t.date)}</td><td><div>${esc(t.customer)}${t.sample?'<span class="tag-sample">MẪU</span>':''}</div><div class="sub2">${esc(t.route||'')}</div></td><td class="num ${sgn(tripProfit(t))}">${vnd(tripProfit(t))}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có chuyến nào. <button class="btn sm primary" data-act="newTrip">${svg('plus')}Nhập chuyến đầu tiên</button></div>`}</section>
+  </div>`;
+}
+function guide(){return `<section class="panel"><div class="panel-h"><h2>Bắt đầu trong 3 bước</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+  <div class="guide"><div><b>1. Nhập chuyến xe</b>Mỗi chuyến: khách, tuyến, xe, cước và các khoản chi trên đường. Lãi chuyến tự tính.</div><div><b>2. Ghi tiền khách trả</b>Vào Thu chi → "Ghi tiền thu". Công nợ tự trừ vào chuyến cũ nhất.</div><div><b>3. Ghi chi phí chung</b>Sửa xe, đăng kiểm, lương văn phòng… để ra lãi thật của tháng.</div></div>
+  <div class="toolbar"><button class="btn primary" data-act="newTrip">${svg('plus')}Nhập chuyến đầu tiên</button><button class="btn" data-act="seed">Tạo dữ liệu mẫu để tập dùng</button></div></div></section>`}
+
+/* ----- Chuyến xe ----- */
+function vTrips(){
+  const m=UI.month;const L=ledger();const q=norm(UI.q);
+  let list=S.trips.filter(t=>inMonth(t.date,m)&&(!q||norm([t.customer,t.route,t.plate,t.driver,t.cargo,t.invoice].join(' ')).includes(q)));
+  if(UI.pay!=='all')list=list.filter(t=>{const s=tripStatus(t,L.tripPaid)[0];return UI.pay==='paid'?s==='Đã thu đủ':s!=='Đã thu đủ'});
+  list.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||'').localeCompare(a.createdAt||''));
+  const sum=k=>list.reduce((s,t)=>s+k(t),0);
+  const hasSample=COLS.some(c=>S[c].some(x=>x.sample));
+  return `${head('Chuyến xe',`${list.length} chuyến · ${mLabel(m)}`,`${hasSample?'<button class="btn sm" data-act="unseed">Xóa dữ liệu mẫu</button>':''}${list.length?`<button class="btn sm" data-act="csvTrips">${svg('dl')}Xuất Excel (CSV)</button>`:''}<button class="btn primary" data-act="newTrip">${svg('plus')}Nhập chuyến</button>`)}
+  ${modeNote()}
+  <div class="filters">
+    <div class="f wide"><label for="q">Tìm</label><input id="q" type="search" value="${esc(UI.q)}" placeholder="Khách, tuyến, biển số, tài xế, số hóa đơn…"></div>
+    <div class="f"><label for="month">Tháng</label><input id="month" type="month" value="${m}"></div>
+    <div class="f"><label for="pay">Thu tiền</label><select id="pay"><option value="all" ${UI.pay==='all'?'selected':''}>Tất cả</option><option value="open" ${UI.pay==='open'?'selected':''}>Chưa thu đủ</option><option value="paid" ${UI.pay==='paid'?'selected':''}>Đã thu đủ</option></select></div>
+  </div>
+  <section class="panel">${!list.length?`<div class="empty">${S.trips.length?'<b>Không có chuyến phù hợp</b>Đổi tháng hoặc từ khóa tìm kiếm.':`<b>Chưa có chuyến nào</b><button class="btn primary" data-act="newTrip">${svg('plus')}Nhập chuyến</button>`}</div>`:`
+  <div class="tbl-wrap swap"><table><thead><tr><th>Ngày</th><th>Khách hàng</th><th>Tuyến · Hàng</th><th>Xe · Tài xế</th><th class="num">Cước</th><th class="num">Phải thu (gồm VAT)</th><th class="num">Chi phí chuyến</th><th class="num">Lãi chuyến</th><th>Thu tiền</th></tr></thead>
+  <tbody>${list.map(t=>{const st=tripStatus(t,L.tripPaid);return `<tr class="click" data-act="editTrip" data-id="${t.id}"><td style="white-space:nowrap">${fmtD(t.date)}</td><td>${esc(t.customer)}${t.sample?'<span class="tag-sample">MẪU</span>':''}${t.invoice?`<div class="sub2">HĐ ${esc(t.invoice)}</div>`:''}</td><td>${esc(t.route||'—')}<div class="sub2">${esc(t.cargo||'')}</div></td><td style="white-space:nowrap">${esc(t.plate||'—')}<div class="sub2">${esc(t.driver||'')}</div></td><td class="num">${vnd(t.freight)}</td><td class="num">${vnd(tripTotal(t))}${+t.vat?`<div class="sub2">VAT ${t.vat}%</div>`:''}</td><td class="num">${vnd(tripCost(t))}</td><td class="num ${sgn(tripProfit(t))}">${vnd(tripProfit(t))}</td><td><span class="pill ${st[1]}">${st[0]}</span></td></tr>`}).join('')}</tbody>
+  <tfoot><tr><td colspan="4">Cộng ${list.length} chuyến</td><td class="num">${vnd(sum(t=>+t.freight||0))}</td><td class="num">${vnd(sum(tripTotal))}</td><td class="num">${vnd(sum(tripCost))}</td><td class="num ${sgn(sum(tripProfit))}">${vnd(sum(tripProfit))}</td><td></td></tr></tfoot></table></div>
+  <div class="cards">${list.map(t=>{const st=tripStatus(t,L.tripPaid);return `<div class="card-row" data-act="editTrip" data-id="${t.id}"><div class="grow"><div class="t">${esc(t.customer)}${t.sample?'<span class="tag-sample">MẪU</span>':''}</div><div class="m">${fmtD(t.date)} · ${esc(t.route||'')} · ${esc(t.plate||'')}</div><div class="m">Cước ${vnd(t.freight)} · Lãi <span class="${sgn(tripProfit(t))}">${vnd(tripProfit(t))}</span></div></div><span class="pill ${st[1]}">${st[0]}</span></div>`}).join('')}</div>`}</section>`;
+}
+
+/* ----- Thu chi ----- */
+function vCash(){
+  const m=UI.month;const isThu=UI.tc==='thu';
+  const list=(isThu?S.receipts:S.expenses).filter(x=>inMonth(x.date,m)).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const total=list.reduce((s,x)=>s+(+x.amount||0),0);
+  const byMethod=METHODS.map(k=>[k,list.filter(x=>(x.method||'Chuyển khoản')===k).reduce((s,x)=>s+(+x.amount||0),0)]);
+  return `${head('Thu chi',mLabel(m),`${monthPicker()}<button class="btn" data-act="newExp">${svg('plus')}Ghi chi phí</button><button class="btn primary" data-act="newRcv">${svg('plus')}Ghi tiền thu</button>`)}
+  ${modeNote()}
+  <section class="panel"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="${isThu}" data-act="tc" data-k="thu">Tiền khách trả</button><button class="tab" role="tab" aria-selected="${!isThu}" data-act="tc" data-k="chi">Chi phí chung</button></div>
+  <div class="panel-b" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line)"><div><span class="muted">Tổng ${isThu?'thu':'chi'}:</span> <b class="${isThu?'pos':'neg'}" style="font-size:18px;font-variant-numeric:tabular-nums">${vnd(total)} đ</b></div>${byMethod.map(([k,v])=>`<div class="muted">${k}: <b style="color:var(--ink);font-variant-numeric:tabular-nums">${vnd(v)}</b></div>`).join('')}${list.length?`<button class="btn sm" style="margin-left:auto" data-act="csvCash">${svg('dl')}Xuất CSV</button>`:''}</div>
+  ${!list.length?`<div class="empty">${isThu?'Chưa ghi khoản thu nào trong tháng.':'Chưa ghi chi phí chung nào trong tháng.'}</div>`:`<div class="tbl-wrap"><table><thead><tr><th>Ngày</th><th>${isThu?'Khách hàng':'Hạng mục'}</th><th class="hide-m">${isThu?'Ghi chú':'Xe · Ghi chú'}</th><th class="hide-m">Hình thức</th><th class="num">Số tiền</th></tr></thead><tbody>
+  ${list.map(x=>`<tr class="click" data-act="${isThu?'editRcv':'editExp'}" data-id="${x.id}"><td style="white-space:nowrap">${fmtD(x.date)}</td><td>${esc(isThu?x.customer:x.category)}${x.sample?'<span class="tag-sample">MẪU</span>':''}</td><td class="hide-m">${esc([isThu?'':x.plate,x.note].filter(Boolean).join(' · ')||'—')}</td><td class="hide-m">${esc(x.method||'')}</td><td class="num">${vnd(x.amount)}</td></tr>`).join('')}
+  </tbody></table></div>`}</section>`;
+}
+
+/* ----- Công nợ ----- */
+function vDebt(){
+  const L=ledger();const rows=L.rows.filter(r=>r.billed||r.paid);
+  const tot=k=>rows.reduce((s,r)=>s+k(r),0);
+  return `${head('Công nợ phải thu',`Tính đến hôm nay ${fmtD(today())}, tiền thu trừ vào chuyến cũ nhất trước`,`${rows.length?`<button class="btn sm" data-act="csvDebt">${svg('dl')}Xuất CSV</button>`:''}<button class="btn primary" data-act="newRcv">${svg('plus')}Ghi tiền thu</button>`)}
+  ${modeNote()}
+  <div class="kpis">
+    <div class="panel kpi"><span class="lbl">Tổng phải thu</span><span class="val">${vndS(tot(r=>r.billed))}</span><span class="sub">cước gồm VAT, mọi thời gian</span></div>
+    <div class="panel kpi"><span class="lbl">Đã thu</span><span class="val pos">${vndS(tot(r=>r.paid))}</span><span class="sub">${S.receipts.length} lần thu</span></div>
+    <div class="panel kpi hl"><span class="lbl">Còn nợ</span><span class="val neg">${vndS(tot(r=>Math.max(0,r.debt)))}</span><span class="sub">${rows.filter(r=>r.debt>0).length} khách</span></div>
+    <div class="panel kpi"><span class="lbl">Nợ quá 60 ngày</span><span class="val ${tot(r=>r.age.c)?'neg':''}">${vndS(tot(r=>r.age.c))}</span><span class="sub">cần đòi gấp</span></div>
+  </div>
+  <section class="panel">${!rows.length?`<div class="empty"><b>Chưa có công nợ</b>Công nợ tự tạo khi nhập chuyến xe.</div>`:`<div class="tbl-wrap"><table><thead><tr><th>Khách hàng</th><th class="num">Số chuyến</th><th class="num">Phải thu</th><th class="num">Đã thu</th><th class="num">Còn nợ</th><th class="num">≤ 30 ngày</th><th class="num">31–60 ngày</th><th class="num">&gt; 60 ngày</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="num">${r.trips}</td><td class="num">${vnd(r.billed)}</td><td class="num">${vnd(r.paid)}</td><td class="num ${r.debt>0?'neg':r.debt<0?'pos':''}" style="font-weight:700">${vnd(r.debt)}${r.debt<0?'<div class="sub2">khách trả thừa</div>':''}</td><td class="num">${r.age.a?vnd(r.age.a):'—'}</td><td class="num">${r.age.b?`<span class="pill p-warn">${vnd(r.age.b)}</span>`:'—'}</td><td class="num">${r.age.c?`<span class="pill p-bad">${vnd(r.age.c)}</span>`:'—'}</td><td>${r.debt>0?`<button class="btn sm" data-act="newRcv" data-cust="${esc(r.name)}" data-amt="${r.debt}">Ghi thu</button>`:''}</td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Cộng</td><td class="num">${tot(r=>r.trips)}</td><td class="num">${vnd(tot(r=>r.billed))}</td><td class="num">${vnd(tot(r=>r.paid))}</td><td class="num">${vnd(tot(r=>r.debt))}</td><td class="num">${vnd(tot(r=>r.age.a))}</td><td class="num">${vnd(tot(r=>r.age.b))}</td><td class="num">${vnd(tot(r=>r.age.c))}</td><td></td></tr></tfoot></table></div>`}</section>`;
+}
+
+/* ----- Báo cáo ----- */
+function vReport(){
+  const m=UI.month;
+  const tr=S.trips.filter(t=>inMonth(t.date,m));const ex=S.expenses.filter(e=>inMonth(e.date,m));
+  const rev=tr.reduce((s,t)=>s+(+t.freight||0),0);
+  const costBy=COST_FIELDS.map(([k,l])=>[l,tr.reduce((s,t)=>s+(+t[k]||0),0)]);
+  const tcost=costBy.reduce((s,x)=>s+x[1],0);
+  const expBy=EXP_CATS.map(c=>[c,ex.filter(e=>e.category===c).reduce((s,e)=>s+(+e.amount||0),0)]).filter(x=>x[1]);
+  const exp=ex.reduce((s,e)=>s+(+e.amount||0),0);
+  const gross=rev-tcost,net=gross-exp;
+  const vatOut=tr.reduce((s,t)=>s+tripVat(t),0);
+  const rcv=S.receipts.filter(r=>inMonth(r.date,m)).reduce((s,r)=>s+(+r.amount||0),0);
+  const group=(keyFn)=>{const g={};for(const t of tr){const k=keyFn(t)||'Chưa ghi';(g[k]??={k,n:0,rev:0,cost:0});g[k].n++;g[k].rev+=+t.freight||0;g[k].cost+=tripCost(t)}return Object.values(g).sort((a,b)=>(b.rev-b.cost)-(a.rev-a.cost))};
+  const byPlate=group(t=>t.plate),byCust=group(t=>t.customer);
+  // chi phí chung gắn xe -> trừ vào lãi xe
+  for(const e of ex){if(!e.plate)continue;let r=byPlate.find(x=>x.k===e.plate);if(!r){r={k:e.plate,n:0,rev:0,cost:0};byPlate.push(r)}r.cost+=+e.amount||0;r.fixed=(r.fixed||0)+(+e.amount||0)}
+  byPlate.sort((a,b)=>(b.rev-b.cost)-(a.rev-a.cost));
+  const maxC=Math.max(1,...costBy.map(x=>x[1]),...expBy.map(x=>x[1]));
+  const grp=(rows,label,note)=>rows.length?`<div class="tbl-wrap"><table><thead><tr><th>${label}</th><th class="num">Chuyến</th><th class="num">Doanh thu</th><th class="num">Chi phí</th><th class="num">Lãi</th><th class="num">Biên</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.k)}${r.fixed?`<div class="sub2">gồm ${vnd(r.fixed)} chi phí xe</div>`:''}</td><td class="num">${r.n}</td><td class="num">${vnd(r.rev)}</td><td class="num">${vnd(r.cost)}</td><td class="num ${sgn(r.rev-r.cost)}" style="font-weight:700">${vnd(r.rev-r.cost)}</td><td class="num">${r.rev?Math.round((r.rev-r.cost)*100/r.rev)+'%':'—'}</td></tr>`).join('')}</tbody></table></div>${note?`<div class="panel-b sub2">${note}</div>`:''}`:'<div class="empty">Chưa có dữ liệu trong tháng.</div>';
+  return `${head('Báo cáo lãi lỗ',mLabel(m),`${monthPicker()}`)}
+  ${modeNote()}
+  <section class="panel"><div class="panel-h"><h2>Kết quả kinh doanh ${mLabel(m)}</h2><span class="sub2">Số liệu quản trị nội bộ, không thay sổ sách kế toán thuế</span></div>
+    <div class="tbl-wrap"><table><tbody>
+      <tr><td>1. Doanh thu cước (chưa VAT)</td><td class="num" style="font-weight:700">${vnd(rev)}</td></tr>
+      <tr><td>2. Chi phí trực tiếp theo chuyến</td><td class="num">(${vnd(tcost)})</td></tr>
+      ${costBy.map(([l,v])=>`<tr><td style="padding-left:32px" class="muted">${l}</td><td class="num muted">${vnd(v)}</td></tr>`).join('')}
+      <tr><td style="font-weight:700">3. Lãi gộp (1 − 2)</td><td class="num ${sgn(gross)}" style="font-weight:700">${vnd(gross)}</td></tr>
+      <tr><td>4. Chi phí chung</td><td class="num">(${vnd(exp)})</td></tr>
+      ${expBy.map(([l,v])=>`<tr><td style="padding-left:32px" class="muted">${esc(l)}</td><td class="num muted">${vnd(v)}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td>5. Lãi tạm tính (3 − 4)</td><td class="num ${sgn(net)}">${vnd(net)}</td></tr></tfoot></table></div>
+    <div class="panel-b" style="display:flex;gap:20px;flex-wrap:wrap" ><span class="muted">VAT đầu ra trên chuyến: <b style="color:var(--ink)">${vnd(vatOut)}</b></span><span class="muted">Tiền thực thu trong tháng: <b style="color:var(--ink)">${vnd(rcv)}</b></span></div>
+  </section>
+  <div class="grid2">
+    <section class="panel"><div class="panel-h"><h2>Lãi theo xe</h2></div>${grp(byPlate,'Biển số','Chi phí chung có ghi biển số xe được trừ vào lãi của xe đó.')}</section>
+    <section class="panel"><div class="panel-h"><h2>Lãi theo khách hàng</h2></div>${grp(byCust,'Khách hàng','')}</section>
+  </div>
+  <section class="panel"><div class="panel-h"><h2>Cơ cấu chi phí</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:10px">
+    ${[...costBy,...expBy].filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).map(([l,v])=>`<div class="hbar"><span>${esc(l)}</span><span class="track"><i style="width:${v*100/maxC}%;background:var(--accent)"></i></span><span class="n">${vndS(v)}</span></div>`).join('')||'<div class="empty">Chưa có chi phí.</div>'}
+  </div></section>`;
+}
+
+/* ---------- form ---------- */
+function openModal(title,body,foot,onSubmit,onMount){
+  const L=document.getElementById('layer');L.innerHTML=`<div class="scrim" data-act="scrim"><form class="modal" role="dialog" aria-modal="true" aria-labelledby="mT" novalidate><div class="modal-h"><h2 id="mT">${title}</h2><button type="button" class="x" data-act="closeModal" aria-label="Đóng">${svg('x')}</button></div><div class="modal-b">${body}</div><div class="modal-f">${foot}</div></form></div>`;
+  document.body.style.overflow='hidden';const f=L.querySelector('form');
+  f.addEventListener('submit',e=>{e.preventDefault();onSubmit(f)});onMount&&onMount(f);
+  setTimeout(()=>f.querySelector('input,select')?.focus(),30);
+}
+function closeModal(){document.getElementById('layer').innerHTML='';document.body.style.overflow=''}
+const dlist=(id,arr)=>`<datalist id="${id}">${arr.map(x=>`<option>${esc(x)}</option>`).join('')}</datalist>`;
+const mInput=(id,label,v,hint='')=>`<div class="f"><label for="${id}">${label}</label><input id="${id}" class="money" inputmode="numeric" value="${v?vnd(v):''}" placeholder="0">${hint?`<span class="hint">${hint}</span>`:''}</div>`;
+const delBlock=()=>`<div class="left" id="delZone"><button type="button" class="btn danger sm" data-act="askDel">Xóa</button></div>`;
+function askDel(f,onYes){const z=f.querySelector('#delZone');z.innerHTML=`<div class="confirm">Xóa hẳn? <button type="button" class="btn sm danger solid" id="yesDel">Xóa</button><button type="button" class="btn sm" id="noDel">Không</button></div>`;z.querySelector('#yesDel').onclick=onYes;z.querySelector('#noDel').onclick=()=>{z.innerHTML='<button type="button" class="btn danger sm" data-act="askDel">Xóa</button>'}}
+
+function tripForm(t){
+  const isNew=!t;t=t||{date:today(),vat:10};
+  const body=`<div class="fg">
+    <div class="sec-t">Thông tin chuyến</div>
+    <div class="f"><label for="tDate">Ngày chạy <span class="req">*</span></label><input id="tDate" type="date" value="${esc(t.date)}"></div>
+    <div class="f s2"><label for="tCust">Khách hàng <span class="req">*</span></label><input id="tCust" list="dlCust" value="${esc(t.customer)}" placeholder="Gõ tên, chọn khách cũ nếu có">${dlist('dlCust',customers())}</div>
+    <div class="f s2"><label for="tRoute">Tuyến</label><input id="tRoute" value="${esc(t.route)}" placeholder="VD: Hà Nội → Bắc Ninh"></div>
+    <div class="f"><label for="tCargo">Hàng chở</label><input id="tCargo" value="${esc(t.cargo)}" placeholder="VD: Máy đào 20 tấn"></div>
+    <div class="f"><label for="tPlate">Biển số xe</label><input id="tPlate" list="dlPlate" value="${esc(t.plate)}" placeholder="VD: 29H-123.45">${dlist('dlPlate',plates())}</div>
+    <div class="f"><label for="tDriver">Tài xế</label><input id="tDriver" list="dlDriver" value="${esc(t.driver)}">${dlist('dlDriver',drivers())}</div>
+    <div class="f"><label for="tInv">Số hóa đơn</label><input id="tInv" value="${esc(t.invoice)}" placeholder="Nếu đã xuất"></div>
+    <div class="sec-t">Doanh thu</div>
+    ${mInput('tFreight','Cước vận chuyển (chưa VAT) <span class="req">*</span>',t.freight)}
+    <div class="f"><label for="tVat">Thuế GTGT</label><select id="tVat">${VATS.map(x=>`<option value="${x.v}" ${+t.vat===x.v?'selected':''}>${x.t}</option>`).join('')}</select><span class="hint">Kiểm tra thuế suất hiện hành với kế toán</span></div>
+    <div class="f"></div>
+    <div class="sec-t">Chi phí chuyến</div>
+    ${COST_FIELDS.map(([k,l])=>mInput('c_'+k,l,t[k])).join('')}
+    <div class="f full"><label for="tNote">Ghi chú</label><textarea id="tNote">${esc(t.note)}</textarea></div>
+  </div>
+  <div class="calc" id="calc"></div><span class="err" id="tErr"></span>`;
+  openModal(isNew?'Nhập chuyến xe':'Sửa chuyến xe',body,`${isNew?'':delBlock()}<button type="button" class="btn" data-act="closeModal">Hủy</button><button class="btn primary" type="submit">${isNew?'Lưu chuyến':'Lưu thay đổi'}</button>`,async f=>{
+    const g=id=>f.querySelector('#'+id).value.trim();
+    const data={date:g('tDate'),customer:g('tCust'),route:g('tRoute'),cargo:g('tCargo'),plate:g('tPlate').toUpperCase(),driver:g('tDriver'),invoice:g('tInv'),freight:parseMoney(g('tFreight')),vat:+g('tVat'),note:g('tNote'),createdAt:t.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),sample:!!t.sample};
+    COST_FIELDS.forEach(([k])=>data[k]=parseMoney(g('c_'+k)));
+    if(!data.date||!data.customer||!data.freight){f.querySelector('#tErr').textContent='Cần nhập ngày, khách hàng và tiền cước.';return}
+    // khớp tên khách cũ khác dấu/hoa thường
+    const ex=customers().find(c=>norm(c)===norm(data.customer));if(ex)data.customer=ex;
+    try{await save('trips',t.id||uid(),data);closeModal();toast(isNew?'Đã lưu chuyến':'Đã lưu thay đổi')}catch(_){}
+  },f=>{
+    const upd=()=>{const fr=parseMoney(f.querySelector('#tFreight').value),vat=+f.querySelector('#tVat').value;const cost=COST_FIELDS.reduce((s,[k])=>s+parseMoney(f.querySelector('#c_'+k).value),0);const p=fr-cost;
+      f.querySelector('#calc').innerHTML=`<div><span>Phải thu khách</span><b>${vnd(fr+Math.round(fr*vat/100))}</b></div><div><span>Tổng chi phí</span><b>${vnd(cost)}</b></div><div><span>Lãi chuyến</span><b class="${sgn(p)}">${vnd(p)}</b></div><div><span>Biên lãi</span><b>${fr?Math.round(p*100/fr)+'%':'—'}</b></div>`};
+    f.addEventListener('input',upd);f.addEventListener('change',upd);upd();
+    f._del=()=>askDel(f,async()=>{try{await remove('trips',t.id);closeModal();toast('Đã xóa chuyến')}catch(_){}});
+  });
+}
+function rcvForm(r,preset={}){
+  const isNew=!r;r=r||{date:today(),method:'Chuyển khoản',customer:preset.cust||'',amount:preset.amt||0};
+  const body=`<div class="fg">
+    <div class="f"><label for="rDate">Ngày thu <span class="req">*</span></label><input id="rDate" type="date" value="${esc(r.date)}"></div>
+    <div class="f s2"><label for="rCust">Khách hàng <span class="req">*</span></label><input id="rCust" list="dlCust2" value="${esc(r.customer)}">${dlist('dlCust2',customers())}</div>
+    ${mInput('rAmt','Số tiền <span class="req">*</span>',r.amount)}
+    <div class="f"><label for="rMethod">Hình thức</label><select id="rMethod">${METHODS.map(x=>`<option ${r.method===x?'selected':''}>${x}</option>`).join('')}</select></div>
+    <div class="f"><label for="rNote">Ghi chú</label><input id="rNote" value="${esc(r.note)}" placeholder="VD: CK Vietcombank"></div>
+  </div><div class="note info" id="rDebt" style="display:none"></div><span class="err" id="rErr"></span>`;
+  openModal(isNew?'Ghi tiền khách trả':'Sửa khoản thu',body,`${isNew?'':delBlock()}<button type="button" class="btn" data-act="closeModal">Hủy</button><button class="btn primary" type="submit">Lưu khoản thu</button>`,async f=>{
+    const g=id=>f.querySelector('#'+id).value.trim();
+    const data={date:g('rDate'),customer:g('rCust'),amount:parseMoney(g('rAmt')),method:g('rMethod'),note:g('rNote'),createdAt:r.createdAt||new Date().toISOString(),sample:!!r.sample};
+    if(!data.date||!data.customer||!data.amount){f.querySelector('#rErr').textContent='Cần nhập ngày, khách hàng và số tiền.';return}
+    const ex=customers().find(c=>norm(c)===norm(data.customer));if(ex)data.customer=ex;
+    try{await save('receipts',r.id||uid(),data);closeModal();toast('Đã ghi khoản thu')}catch(_){}
+  },f=>{
+    const show=()=>{const n=norm(f.querySelector('#rCust').value);const row=ledger().rows.find(x=>norm(x.name)===n);const box=f.querySelector('#rDebt');if(row){box.style.display='';box.textContent=`Khách này đang nợ ${vnd(row.debt+(isNew?0:+r.amount||0))} đ (tính cả khoản đang sửa).`}else box.style.display='none'};
+    f.querySelector('#rCust').addEventListener('input',show);show();
+    f._del=()=>askDel(f,async()=>{try{await remove('receipts',r.id);closeModal();toast('Đã xóa khoản thu')}catch(_){}});
+  });
+}
+function expForm(x){
+  const isNew=!x;x=x||{date:today(),method:'Tiền mặt',category:EXP_CATS[0]};
+  const body=`<div class="fg">
+    <div class="f"><label for="eDate">Ngày chi <span class="req">*</span></label><input id="eDate" type="date" value="${esc(x.date)}"></div>
+    <div class="f s2"><label for="eCat">Hạng mục</label><select id="eCat">${EXP_CATS.map(c=>`<option ${x.category===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    ${mInput('eAmt','Số tiền <span class="req">*</span>',x.amount)}
+    <div class="f"><label for="eMethod">Hình thức</label><select id="eMethod">${METHODS.map(m=>`<option ${x.method===m?'selected':''}>${m}</option>`).join('')}</select></div>
+    <div class="f"><label for="ePlate">Cho xe (nếu có)</label><input id="ePlate" list="dlPlate2" value="${esc(x.plate)}" placeholder="Biển số">${dlist('dlPlate2',plates())}</div>
+    <div class="f full"><label for="eNote">Ghi chú</label><input id="eNote" value="${esc(x.note)}" placeholder="VD: Thay má phanh, gara Minh Tâm"></div>
+  </div><span class="err" id="eErr"></span>`;
+  openModal(isNew?'Ghi chi phí chung':'Sửa chi phí',body,`${isNew?'':delBlock()}<button type="button" class="btn" data-act="closeModal">Hủy</button><button class="btn primary" type="submit">Lưu chi phí</button>`,async f=>{
+    const g=id=>f.querySelector('#'+id).value.trim();
+    const data={date:g('eDate'),category:g('eCat'),amount:parseMoney(g('eAmt')),method:g('eMethod'),plate:g('ePlate').toUpperCase(),note:g('eNote'),createdAt:x.createdAt||new Date().toISOString(),sample:!!x.sample};
+    if(!data.date||!data.amount){f.querySelector('#eErr').textContent='Cần nhập ngày và số tiền.';return}
+    try{await save('expenses',x.id||uid(),data);closeModal();toast('Đã ghi chi phí')}catch(_){}
+  },f=>{f._del=()=>askDel(f,async()=>{try{await remove('expenses',x.id);closeModal();toast('Đã xóa chi phí')}catch(_){}})});
+}
+
+/* ---------- xuất CSV ---------- */
+const csvCell=v=>{v=String(v??'');return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+async function saveCsv(name,rows){
+  const txt='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+  if(!dl){blobSave(name,txt,'text/csv');return}
+  try{await dl.save({filename:name,data:txt});toast('Đã xuất file')}catch(e){if(e&&e.code!=='declined')toast('Chưa xuất được file.')}
+}
+function blobSave(name,txt,type){const u=URL.createObjectURL(new Blob([txt],{type:type+';charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Đã tải file '+name)}
+function backup(){blobSave('sao-luu-so-chuyen-'+today()+'.json',JSON.stringify({app:'so-chuyen-su-nghiep',version:1,trips:S.trips,receipts:S.receipts,expenses:S.expenses,savedAt:new Date().toISOString()},null,1),'application/json')}
+function restore(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.app!=='so-chuyen-su-nghiep')throw 0;COLS.forEach(c=>S[c]=Array.isArray(d[c])?d[c]:[]);persist();render();toast('Đã khôi phục dữ liệu')}catch(_){toast('File không đúng định dạng sao lưu của Sổ Chuyến.')}};r.readAsText(file)}
+function csvTrips(){const m=UI.month;const L=ledger();saveCsv(`chuyen-xe-${m}.csv`,[['Ngày','Khách hàng','Tuyến','Hàng','Biển số','Tài xế','Số HĐ','Cước chưa VAT','VAT %','Tiền VAT','Phải thu',...COST_FIELDS.map(c=>c[1]),'Tổng chi phí','Lãi chuyến','Thu tiền','Ghi chú'],...S.trips.filter(t=>inMonth(t.date,m)).sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[fmtD(t.date),t.customer,t.route,t.cargo,t.plate,t.driver,t.invoice,+t.freight||0,+t.vat||0,tripVat(t),tripTotal(t),...COST_FIELDS.map(([k])=>+t[k]||0),tripCost(t),tripProfit(t),tripStatus(t,L.tripPaid)[0],t.note])])}
+function csvCash(){const m=UI.month;const thu=UI.tc==='thu';saveCsv(`${thu?'tien-thu':'chi-phi'}-${m}.csv`,thu?[['Ngày','Khách hàng','Số tiền','Hình thức','Ghi chú'],...S.receipts.filter(r=>inMonth(r.date,m)).map(r=>[fmtD(r.date),r.customer,+r.amount||0,r.method,r.note])]:[['Ngày','Hạng mục','Số tiền','Hình thức','Biển số','Ghi chú'],...S.expenses.filter(e=>inMonth(e.date,m)).map(e=>[fmtD(e.date),e.category,+e.amount||0,e.method,e.plate,e.note])])}
+function csvDebt(){saveCsv(`cong-no-${today()}.csv`,[['Khách hàng','Số chuyến','Phải thu','Đã thu','Còn nợ','<=30 ngày','31-60 ngày','>60 ngày'],...ledger().rows.map(r=>[r.name,r.trips,r.billed,r.paid,r.debt,r.age.a,r.age.b,r.age.c])])}
+
+/* ---------- dữ liệu mẫu ---------- */
+async function seed(){
+  const d=n=>{const x=new Date();x.setDate(x.getDate()-n);return dstr(x)};const now=new Date().toISOString();
+  const trips=[
+    {date:d(70),customer:'Công ty Xây dựng A (mẫu)',route:'Hà Nội → Bắc Ninh',cargo:'Máy đào 20 tấn',plate:'29H-000.01',driver:'Tài xế 1',freight:12000000,vat:10,fuel:2600000,toll:450000,loading:800000,driverPay:1500000,otherCost:0},
+    {date:d(20),customer:'Công ty Xây dựng A (mẫu)',route:'Hà Nội → Hải Dương',cargo:'Máy lu rung',plate:'29H-000.01',driver:'Tài xế 1',freight:9000000,vat:10,fuel:1900000,toll:300000,loading:0,driverPay:1200000,otherCost:200000},
+    {date:d(5),customer:'Đại lý máy nông nghiệp B (mẫu)',route:'Thái Bình → Nam Định',cargo:'2 máy gặt',plate:'29H-000.02',driver:'Tài xế 2',freight:7500000,vat:0,fuel:1500000,toll:150000,loading:500000,driverPay:1000000,otherCost:0},
+    {date:d(2),customer:'Cho thuê thiết bị C (mẫu)',route:'Hải Phòng → Quảng Ninh',cargo:'Xe cẩu bánh lốp',plate:'29H-000.02',driver:'Tài xế 2',freight:15000000,vat:10,fuel:3000000,toll:600000,loading:1200000,driverPay:1800000,otherCost:0}];
+  for(const t of trips)await save('trips',uid(),{...t,invoice:'',note:'Dữ liệu mẫu',createdAt:now,updatedAt:now,sample:true});
+  await save('receipts',uid(),{date:d(15),customer:'Công ty Xây dựng A (mẫu)',amount:10000000,method:'Chuyển khoản',note:'Dữ liệu mẫu',createdAt:now,sample:true});
+  await save('receipts',uid(),{date:d(1),customer:'Cho thuê thiết bị C (mẫu)',amount:16500000,method:'Chuyển khoản',note:'Dữ liệu mẫu',createdAt:now,sample:true});
+  await save('expenses',uid(),{date:d(3),category:'Sửa chữa, bảo dưỡng xe',amount:2400000,method:'Tiền mặt',plate:'29H-000.01',note:'Dữ liệu mẫu',createdAt:now,sample:true});
+  await save('expenses',uid(),{date:d(4),category:'Lương văn phòng',amount:8000000,method:'Chuyển khoản',plate:'',note:'Dữ liệu mẫu',createdAt:now,sample:true});
+  toast('Đã tạo dữ liệu mẫu');
+}
+async function unseed(){for(const c of COLS)for(const x of S[c].filter(x=>x.sample))await remove(c,x.id);toast('Đã xóa dữ liệu mẫu')}
+
+/* ---------- sự kiện ---------- */
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  if(a==='scrim'){if(e.target===el)closeModal();return}
+  const id=el.dataset.id;
+  switch(a){
+    case 'newTrip':tripForm();break;
+    case 'editTrip':tripForm(S.trips.find(x=>x.id===id));break;
+    case 'newRcv':rcvForm(null,{cust:el.dataset.cust||'',amt:+el.dataset.amt||0});break;
+    case 'editRcv':rcvForm(S.receipts.find(x=>x.id===id));break;
+    case 'newExp':expForm();break;
+    case 'editExp':expForm(S.expenses.find(x=>x.id===id));break;
+    case 'closeModal':closeModal();break;
+    case 'askDel':{const f=el.closest('form');f&&f._del&&f._del();break}
+    case 'tc':UI.tc=el.dataset.k;render();break;
+    case 'seed':el.disabled=true;try{await seed()}catch(_){}break;
+    case 'unseed':el.disabled=true;try{await unseed()}catch(_){}break;
+    case 'backup':backup();break;
+    case 'csvTrips':csvTrips();break; case 'csvCash':csvCash();break; case 'csvDebt':csvDebt();break;
+  }
+});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.classList.contains('money')){const d=t.value.replace(/\D/g,'');t.value=d?NF.format(+d):''}
+  if(t.id==='q'){UI.q=t.value;render()}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='month'&&t.value&&t.closest('#view')){UI.month=t.value;render()}
+  if(t.id==='pay'){UI.pay=t.value;render()}
+  if(t.id==='restoreFile'&&t.files[0])restore(t.files[0]);});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('#layer .scrim'))closeModal()});
+readHash();boot();
+</script>
+
+</body></html>
